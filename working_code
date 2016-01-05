@@ -1,4 +1,7 @@
-##packages
+#wipe R's brain
+rm(list=ls())
+
+#packages
 library(vegan)
 library(ggplot2)
 library(reshape2)
@@ -6,3 +9,5 @@ library(fossil)
 library(dplyr)
 library(stringr)
 library(boot)
+
+#
