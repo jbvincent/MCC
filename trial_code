@@ -1,0 +1,129 @@
+rm(list=ls())
+
+setwd("/Users/JBVincent/Desktop/post_doc/MCC")
+
+##packages
+library(vegan)
+library(ggplot2)
+library(reshape2)
+library(fossil)
+library(dplyr)
+library(stringr)
+library(boot)
+
+##load data
+MCC_pilot_data<-read.table("MCC_data.txt",header=TRUE)
+str(MCC_pilot_data)
+
+##munging
+MCC_pilot_data_melted<-melt(MCC_pilot_data)
+MCC_pilot_matrix<-create.matrix(MCC_pilot_data_melted,tax.name="variable",locality="master_ID",abund=TRUE,abund.col="value")
+
+##dist
+MCC_dist<-vegdist(decostand(t(MCC_pilot_matrix),"total"),method="bray")
+
+##melt
+MCC_dist_melted<-melt(as.matrix(MCC_dist))
+
+##split fields and name indices for year and plot for pairs
+
+MCC_dist_df<-MCC_dist_melted
+
+MCC_dist_melted$plot_89<-sub("_.*", "",MCC_dist_melted$Var1,"_")
+
+MCC_dist_melted$year_89<-str_sub(MCC_dist_melted$Var1,-4,-1)
+
+MCC_dist_melted$plot_other<-sub("_.*", "",MCC_dist_melted$Var2,"_")
+
+MCC_dist_melted$year_other<-str_sub(MCC_dist_melted$Var2,-4,-1)
+
+
+##filter for 1989 in one row
+
+MCC_dist_melted<-MCC_dist_melted[which(MCC_dist_melted$year_89=="1989"),]
+
+##filter for all but 1989 in another row
+
+MCC_dist_melted<-MCC_dist_melted[-which(MCC_dist_melted$year_other=="1989"),]
+
+##select only plots in 89
+MCC_dist_melted<-MCC_dist_melted[which(MCC_dist_melted$plot_89 == MCC_dist_melted$plot_other),]
+
+
+##bootstrap
+mean.fun <- function(dat, idx) mean(dat[idx], na.rm = TRUE)
+
+##write bootstrap lood
+
+
+
+
+##bootstrap 1996
+
+plot_values_1996<-MCC_dist_melted[which(MCC_dist_melted$year_other==1996),]
+
+boot_mean_1996 <- boot(data=plot_values_1996$value,statistic=mean.fun,R=1000)
+boot_ci_1996 <- boot.ci(boot_mean_1996)
+
+boot_mean_1996_value<-boot_mean_1996$t0
+boot_ci_1996_value<-boot_ci_1996$normal[,2:3]
+##bootstrap 2002
+
+plot_values_2002<-MCC_dist_melted[which(MCC_dist_melted$year_other==2002),]
+
+boot_mean_2002 <- boot(data=plot_values_2002$value,statistic=mean.fun,R=1000)
+boot_ci_2002 <- boot.ci(boot_mean_2002)
+
+boot_mean_2002_value<-boot_mean_2002$t0
+boot_ci_2002_value<-boot_ci_2002$normal[,2:3]
+
+##boot strap graphing
+boot_graph<-data.frame(year=unique(MCC_dist_melted$year_other))
+
+boot_graph$mean<-c(boot_mean_1996$t0,boot_mean_2002$t0)
+boot_graph$lower<-c(boot_ci_1996$normal[,2],boot_ci_2002$normal[,2])
+boot_graph$upper<-c(boot_ci_1996$normal[,3],boot_ci_2002$normal[,3])
+
+
+
+#plot MCC
+base_MCC<-ggplot(MCC_dist_melted,aes(x=as.numeric(year_other),y=value,group=MCC_dist_melted$plot_other))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(limits=c(1992,2004),breaks=c(1992,1993,1994,1996,1997,2002,2003,2004))+theme(panel.grid.minor = element_blank())
+
+base_MCC + annotate("point", x = boot_graph$year, y = boot_graph$mean,colour="red")+annotate("segment",x=1,xend=2,y=boot_graph$mean[2],yend=boot_graph$mean[1],colour="red")
+    
+
+
+##Extracting off-diagonal in r
+
+#or Ben Bolker's better alternative
+low <- 0
+high <- 3
+delta <- row(mat) - col(mat)
+mat[delta < low | delta > high] <- NA
+mat
+
+or
+
+c[lower.tri(c,diag=FALSE)]
+
+or 
+
+we can get the upper  off-diagonal using this little trick:
+
+> A[row(A) == (col(A) - 1)]
+
+and the lower off diagonal via this:
+
+> A[row(A) == (col(A) + 1)]
+[1]  2  7 12
+These can be generalised to give whatever diagonals you want:
+
+> A[row(A) == (col(A) - 2)]
+[1]  9 14
+
+label vals
+
+A_names<-colnames(A)
+
+dataframe(A_names,vals)
+
