@@ -12,7 +12,9 @@ library(stringr)
 library(boot)
 library(magrittr)
 library(reshape2)
-library(purr)
+library(purrr)
+library(labdsv)
+library(gdata)
 
 ##read in data
 
@@ -40,9 +42,18 @@ MCC_dist_list<-lapply(MCC_matrix_list,vegdist)
 
 MCC_dist_list<-lapply(MCC_dist_list,as.matrix)
 
+##off diag (without labels)
+
+MCC_dist_list<-lapply(MCC_dist_list,function(x) {x[row(x) == (col(x) + 1)]})
+
+
+
+
+
 MCC_dist_list<-lapply(MCC_dist_list,melt)
 
-MCC_dists_flattened<-flatten_lgl(MCC_dist_list)
+MCC_dist_flattened<-flatten(MCC_dist_list)
+
 
 
 #
