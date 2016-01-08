@@ -1,0 +1,12 @@
+rm(list=ls())
+
+setwd("/Users/JBVincent/Desktop/post_doc/MCC")
+
+##packages
+library(vegan)
+library(ggplot2)
+library(reshape2)
+library(fossil)
+library(dplyr)
+library(stringr)
+library(boot)
