@@ -42,11 +42,16 @@ MCC_dist_list<-lapply(MCC_matrix_list,vegdist)
 
 MCC_dist_list<-lapply(MCC_dist_list,as.matrix)
 
-##off diag (without labels)
+##off diag - relative to previous year (without labels)
 
-MCC_dist_list<-lapply(MCC_dist_list,function(x) {x[row(x) == (col(x) + 1)]})
+MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {x[row(x) == (col(x) + 1)]})
 
+##first row - relative to starting condition (without labels)
+MCC_dist_list_first_column<-lapply(MCC_dist_list,function(x) {x[col(1)]})
 
+MCC_compiled<-as.data.frame(flatten(MCC_dist_list_first_column))
+
+MCC_compiled <- add_rownames(MCC_compiled, "key")
 
 
 
