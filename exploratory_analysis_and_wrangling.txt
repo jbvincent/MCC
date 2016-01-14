@@ -47,20 +47,15 @@ MCC_dist_list<-lapply(MCC_dist_list,as.matrix)
 MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {x[row(x) == (col(x) + 1)]})
 
 ##first row - relative to starting condition (without labels)
-MCC_dist_list_first_column<-lapply(MCC_dist_list,function(x) {x[col(1)]})
+MCC_dist_list_first_column<-lapply(MCC_dist_list,function(x) {x[,1]})
 
-MCC_compiled<-as.data.frame(flatten(MCC_dist_list_first_column))
+MCC_first_column_compiled<-as.data.frame(flatten(MCC_dist_list_first_column))
 
-MCC_compiled <- add_rownames(MCC_compiled, "key")
+MCC_first_column_compiled$key <- rownames(MCC_first_column_compiled)
 
+MCC_first_column_compiled<-MCC_first_column_compiled%>%separate("key", c("plot", "year"))
 
-
-MCC_dist_list<-lapply(MCC_dist_list,melt)
-
-MCC_dist_flattened<-flatten(MCC_dist_list)
+MCC_first_column_compiled<-subset(MCC_first_column_compiled, year!="NA")
 
 
 
-#
-
-MCC_pilot_matrix<-create.matrix(MCC_pilot_data_melted,tax.name="variable",locality="master_ID",abund=TRUE,abund.col="value")
