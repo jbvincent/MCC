@@ -15,6 +15,8 @@ library(reshape2)
 library(purrr)
 library(labdsv)
 library(gdata)
+library(plyr)
+
 
 ##read in data
 
@@ -32,7 +34,7 @@ MCC_pilot_data_melted<-MCC_pilot_data_melted%>%separate(master_ID, c("plot", "ye
 plots<-unique(MCC_pilot_data_melted$plot)
 MCC_split_list<-split( MCC_pilot_data_melted , MCC_pilot_data_melted$plot)
 
-##make matrices for each plot
+#make matrices for each plot
 
 MCC_split_list<-lapply(MCC_split_list, function(x) { x[2:4] })
 
@@ -44,9 +46,35 @@ MCC_dist_list<-lapply(MCC_dist_list,as.matrix)
 
 ##off diag - relative to previous year (without labels)
 
-MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {x[row(x) == (col(x) + 1)]})
+MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {cbind(x[row(x) == (col(x) + 1)],x[-1,0])})
 
-##first row - relative to starting condition (without labels)
+MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,as.data.frame)
+
+MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,add_rownames)
+
+##no plot #
+MCC_off_diag_compiled<- do.call("rbind", MCC_dist_list_off_diag)
+
+
+
+
+
+####
+MCC_off_diag_compiled<-as.data.frame(MCC_off_diag_compiled)
+
+MCC_off_diag_compiled$key <- rownames(MCC_off_diag_compiled)
+
+MCC_off_diag_compiled<-MCC_off_diag_compiled%>%separate("key", c("plot", "year"))
+
+MCC_off_diag_compiled<-subset(MCC_off_diag_compiled, year!="NA")
+
+MCC_off_diag_compiled<-plyr::rename(MCC_off_diag_compiled, c("MCC_off_diag_compiled" = "value"))
+
+MCC_off_diag_compiled<-subset(MCC_off_diag_compiled, value!=0)
+
+
+#first row - relative to starting condition (without labels)
+
 MCC_dist_list_first_column<-lapply(MCC_dist_list,function(x) {x[,1]})
 
 MCC_first_column_compiled<-as.data.frame(flatten(MCC_dist_list_first_column))
@@ -57,5 +85,12 @@ MCC_first_column_compiled<-MCC_first_column_compiled%>%separate("key", c("plot",
 
 MCC_first_column_compiled<-subset(MCC_first_column_compiled, year!="NA")
 
+MCC_first_column_compiled<-plyr::rename(MCC_first_column_compiled, c("flatten(MCC_dist_list_first_column)" = "value"))
 
+MCC_first_column_compiled<-subset(MCC_first_column_compiled, value!=0)
+
+
+#plotting
+
+MCC<-ggplot(
 
