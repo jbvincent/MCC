@@ -46,13 +46,19 @@ MCC_dist_list<-lapply(MCC_dist_list,as.matrix)
 
 ##off diag - relative to previous year (without labels)
 
-MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {cbind(x[row(x) == (col(x) + 1)],x[-1,0])})
+MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {cbind(x[row(x) == (col(x) + 1)],x[-1,0],colnames(x))})
 
 MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,as.data.frame)
 
 MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,add_rownames)
 
-##no plot #
+
+
+#
+
+MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,function(x) {)
+
+
 MCC_off_diag_compiled<- do.call("rbind", MCC_dist_list_off_diag)
 
 
