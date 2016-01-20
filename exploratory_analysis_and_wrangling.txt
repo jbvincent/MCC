@@ -44,7 +44,7 @@ MCC_dist_list<-lapply(MCC_matrix_list,vegdist)
 
 MCC_dist_list<-lapply(MCC_dist_list,as.matrix)
 
-##off diag - relative to previous year (without labels)
+##off diag - relative to previous year
 
 MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {cbind(x[row(x) == (col(x) + 1)],x[-1,0],colnames(x))})
 
@@ -52,31 +52,14 @@ MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,as.data.frame)
 
 MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,add_rownames)
 
+MCC_off_diag_compiled<-ldply(MCC_dist_list_off_diag)
 
+MCC_off_diag_compiled$V1<-as.numeric(as.character(MCC_off_diag_compiled$V1))
 
-#
+MCC_off_diag_compiled$rowname<-as.factor(MCC_off_diag_compiled$rowname)
 
-MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,function(x) {)
+MCC_off_diag_compiled<-plyr::rename(MCC_off_diag_compiled,c(".id"="plot","rowname"="current","V1"="dist","V2"="previous"))
 
-
-MCC_off_diag_compiled<- do.call("rbind", MCC_dist_list_off_diag)
-
-
-
-
-
-####
-MCC_off_diag_compiled<-as.data.frame(MCC_off_diag_compiled)
-
-MCC_off_diag_compiled$key <- rownames(MCC_off_diag_compiled)
-
-MCC_off_diag_compiled<-MCC_off_diag_compiled%>%separate("key", c("plot", "year"))
-
-MCC_off_diag_compiled<-subset(MCC_off_diag_compiled, year!="NA")
-
-MCC_off_diag_compiled<-plyr::rename(MCC_off_diag_compiled, c("MCC_off_diag_compiled" = "value"))
-
-MCC_off_diag_compiled<-subset(MCC_off_diag_compiled, value!=0)
 
 
 #first row - relative to starting condition (without labels)
@@ -93,8 +76,19 @@ MCC_first_column_compiled<-subset(MCC_first_column_compiled, year!="NA")
 
 MCC_first_column_compiled<-plyr::rename(MCC_first_column_compiled, c("flatten(MCC_dist_list_first_column)" = "value"))
 
+
+
+#add in base year
+
+base_years<-MCC_first_column_compiled[which(MCC_first_column_compiled$value==0),]
+
+base_years<-base_years[,2:3]
+
+base_years<-plyr::rename(base_years, c("year" = "base_year"))
+
 MCC_first_column_compiled<-subset(MCC_first_column_compiled, value!=0)
 
+MCC_first_column_compiled2<-merge(MCC_first_column_compiled,base_years,by="plot",all.x=TRUE)
 
 #plotting
 
