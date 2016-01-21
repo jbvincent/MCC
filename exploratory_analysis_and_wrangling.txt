@@ -16,6 +16,7 @@ library(purrr)
 library(labdsv)
 library(gdata)
 library(plyr)
+library(boot)
 
 
 ##read in data
@@ -62,22 +63,34 @@ MCC_off_diag_compiled$current<-as.numeric(as.character(MCC_off_diag_compiled$cur
 
 MCC_off_diag_compiled <- MCC_off_diag_compiled[which(MCC_off_diag_compiled$current > 2),]
 
+
+##botstrapping for loop
+
+boot_year<-c()
+boot_mean<-c()
+boot_10<-c()
+boot_90<-c()
+
+for (i in 1:10) { 
+temp1<-MCC_off_diag_compiled[which(MCC_off_diag_compiled$current==MCC_off_diag_years[i]),]
+temp2<-sample(temp1$dist,10000,replace=TRUE)
+boot_mean[i]<-mean(temp2)
+boot_10[i]<-quantile(temp2,0.10)
+boot_90[i]<-quantile(temp2,0.90)
+boot_year[i]<-temp1[1,2]
+}
+
+boot_data<-cbind(boot_year,boot_mean,boot_10,boot_90)
+boot_data<-as.data.frame(boot_data)
+boot_data<-melt(boot_data,id.vars="boot_year")
+
 ##plotting
 
 MCC_off_diag_years<-unique(MCC_off_diag_compiled$current)
 
 base_off_diag_MCC<-ggplot(MCC_off_diag_compiled,aes(x=as.numeric(current),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_off_diag_years)+theme(panel.grid.minor = element_blank())
 
-##botstrapping for loop
-
-boot_plot<-c()
-boot_mean<-c()
-boot_5<-c()
-boot_95<-c()
-for (i in 1:length(MCC_off_diag_years){
-temp1<-MCC_off_diag_compiled[which(MCC_off_diag_compiled$plot==MCC_off_diag_years[i]
-
-
+base_off_diag_MCC + geom_line(data=boot_data,aes(x=boot_year,y=value,group=variable),colour="red")
 
 
 
@@ -109,6 +122,27 @@ base_years<-plyr::rename(base_years, c("year" = "base_year"))
 MCC_first_column_compiled<-subset(MCC_first_column_compiled, value!=0)
 
 MCC_first_column_compiled2<-merge(MCC_first_column_compiled,base_years,by="plot",all.x=TRUE)
+
+
+##boot strapping
+
+boot_year<-c()
+boot_mean<-c()
+boot_5<-c()
+boot_95<-c()
+
+for (i in 1:10) { 
+temp1<-MCC_off_diag_compiled[which(MCC_off_diag_compiled$current==MCC_off_diag_years[i]),]
+temp2<-sample(temp1$dist,10000,replace=TRUE)
+boot_mean[i]<-mean(temp2)
+boot_5[i]<-quantile(temp2,0.05)
+boot_95[i]<-quantile(temp2,0.95)
+boot_year[i]<-temp1[1,2]
+}
+
+boot_data<-cbind(boot_year,boot_mean,boot_5,boot_95)
+
+
 
 #plotting
 
