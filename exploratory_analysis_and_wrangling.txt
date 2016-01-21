@@ -17,6 +17,7 @@ library(labdsv)
 library(gdata)
 library(plyr)
 library(boot)
+library(pracma)
 
 
 ##read in data
@@ -37,13 +38,20 @@ MCC_split_list<-split( MCC_pilot_data_melted , MCC_pilot_data_melted$plot)
 
 #make matrices for each plot
 
-MCC_split_list<-lapply(MCC_split_list, function(x) { x[2:4] })
+MCC_split_list<-lapply(MCC_split_list, pra)
 
 MCC_matrix_list<-lapply(MCC_split_list,matrify)
+
+##transformation (sqr or 4th root?)##
+
+MCC_matrix_list<-lapply(MCC_matrix_list,function(x) {x^(1/4)})
 
 MCC_dist_list<-lapply(MCC_matrix_list,vegdist)
 
 MCC_dist_list<-lapply(MCC_dist_list,as.matrix)
+
+
+
 
 ##off diag - relative to previous year
 
@@ -66,31 +74,32 @@ MCC_off_diag_compiled <- MCC_off_diag_compiled[which(MCC_off_diag_compiled$curre
 
 ##botstrapping for loop
 
-boot_year<-c()
-boot_mean<-c()
-boot_10<-c()
-boot_90<-c()
+MCC_off_diag_years<-unique(MCC_off_diag_compiled$current)
+
+
+od_boot_year<-c()
+od_boot_mean<-c()
+od_boot_10<-c()
+od_boot_90<-c()
 
 for (i in 1:10) { 
 temp1<-MCC_off_diag_compiled[which(MCC_off_diag_compiled$current==MCC_off_diag_years[i]),]
 temp2<-sample(temp1$dist,10000,replace=TRUE)
-boot_mean[i]<-mean(temp2)
-boot_10[i]<-quantile(temp2,0.10)
-boot_90[i]<-quantile(temp2,0.90)
-boot_year[i]<-temp1[1,2]
+od_boot_mean[i]<-mean(temp2)
+od_boot_10[i]<-quantile(temp2,0.10)
+od_boot_90[i]<-quantile(temp2,0.90)
+od_boot_year[i]<-temp1[1,2]
 }
 
-boot_data<-cbind(boot_year,boot_mean,boot_10,boot_90)
-boot_data<-as.data.frame(boot_data)
-boot_data<-melt(boot_data,id.vars="boot_year")
+od_boot_data<-cbind(od_boot_year,od_boot_mean,od_boot_10,od_boot_90)
+od_boot_data<-as.data.frame(od_boot_data)
+od_boot_data<-melt(od_boot_data,id.vars="od_boot_year")
 
 ##plotting
 
-MCC_off_diag_years<-unique(MCC_off_diag_compiled$current)
+base_off_diag_MCC<-ggplot(MCC_off_diag_compiled,aes(x=as.numeric(current),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_off_diag_years)+theme(panel.grid.minor = element_blank())+ggtitle("off diagonal")
 
-base_off_diag_MCC<-ggplot(MCC_off_diag_compiled,aes(x=as.numeric(current),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_off_diag_years)+theme(panel.grid.minor = element_blank())
-
-base_off_diag_MCC + geom_line(data=boot_data,aes(x=boot_year,y=value,group=variable),colour="red")
+base_off_diag_MCC + geom_line(data=od_boot_data,aes(x=od_boot_year,y=value,group=variable),colour="red")
 
 
 
@@ -110,7 +119,6 @@ MCC_first_column_compiled<-subset(MCC_first_column_compiled, year!="NA")
 MCC_first_column_compiled<-plyr::rename(MCC_first_column_compiled, c("flatten(MCC_dist_list_first_column)" = "value"))
 
 
-
 #add in base year
 
 base_years<-MCC_first_column_compiled[which(MCC_first_column_compiled$value==0),]
@@ -123,28 +131,36 @@ MCC_first_column_compiled<-subset(MCC_first_column_compiled, value!=0)
 
 MCC_first_column_compiled2<-merge(MCC_first_column_compiled,base_years,by="plot",all.x=TRUE)
 
+MCC_first_column_compiled2$year<-as.numeric(MCC_first_column_compiled$year)
+
 
 ##boot strapping
 
-boot_year<-c()
-boot_mean<-c()
-boot_5<-c()
-boot_95<-c()
+MCC_first_column_years<-unique(MCC_first_column_compiled2$year)
+MCC_first_column_years<-as.numeric(MCC_first_column_years)
+
+fc_boot_year<-c()
+fc_boot_mean<-c()
+fc_boot_10<-c()
+fc_boot_90<-c()
 
 for (i in 1:10) { 
-temp1<-MCC_off_diag_compiled[which(MCC_off_diag_compiled$current==MCC_off_diag_years[i]),]
-temp2<-sample(temp1$dist,10000,replace=TRUE)
-boot_mean[i]<-mean(temp2)
-boot_5[i]<-quantile(temp2,0.05)
-boot_95[i]<-quantile(temp2,0.95)
-boot_year[i]<-temp1[1,2]
+temp1<-MCC_first_column_compiled2[which(MCC_first_column_compiled2$year==MCC_first_column_years[i]),]
+temp2<-sample(temp1$value,10000,replace=TRUE)
+fc_boot_mean[i]<-mean(temp2)
+fc_boot_10[i]<-quantile(temp2,0.10)
+fc_boot_90[i]<-quantile(temp2,0.90)
+fc_boot_year[i]<-temp1[1,3]
 }
 
-boot_data<-cbind(boot_year,boot_mean,boot_5,boot_95)
+fc_boot_data<-cbind(fc_boot_year,fc_boot_mean,fc_boot_10,fc_boot_90)
 
-
+fc_boot_data<-as.data.frame(fc_boot_data)
+fc_boot_data<-melt(fc_boot_data,id.vars="fc_boot_year")
 
 #plotting
 
-base_first_column_MCC<-ggplot(MCC_first_column_compiled2,aes(x=as.numeric(year),y=value,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=as.numeric(MCC_first_column_breaks))+theme(panel.grid.minor = element_blank())
+base_first_column_MCC<-ggplot(MCC_first_column_compiled2,aes(x=year,y=value,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_first_column_years)+theme(panel.grid.minor = element_blank())+ggtitle("first column")
+
+base_first_column_MCC + geom_line(data=fc_boot_data,aes(x=fc_boot_year,y=value,group=variable),colour="red")
 
