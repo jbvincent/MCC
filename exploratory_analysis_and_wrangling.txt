@@ -56,9 +56,29 @@ MCC_off_diag_compiled<-ldply(MCC_dist_list_off_diag)
 
 MCC_off_diag_compiled$V1<-as.numeric(as.character(MCC_off_diag_compiled$V1))
 
-MCC_off_diag_compiled$rowname<-as.factor(MCC_off_diag_compiled$rowname)
-
 MCC_off_diag_compiled<-plyr::rename(MCC_off_diag_compiled,c(".id"="plot","rowname"="current","V1"="dist","V2"="previous"))
+
+MCC_off_diag_compiled$current<-as.numeric(as.character(MCC_off_diag_compiled$current))
+
+MCC_off_diag_compiled <- MCC_off_diag_compiled[which(MCC_off_diag_compiled$current > 2),]
+
+##plotting
+
+MCC_off_diag_years<-unique(MCC_off_diag_compiled$current)
+
+base_off_diag_MCC<-ggplot(MCC_off_diag_compiled,aes(x=as.numeric(current),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_off_diag_years)+theme(panel.grid.minor = element_blank())
+
+##botstrapping for loop
+
+boot_plot<-c()
+boot_mean<-c()
+boot_5<-c()
+boot_95<-c()
+for (i in 1:length(MCC_off_diag_years){
+temp1<-MCC_off_diag_compiled[which(MCC_off_diag_compiled$plot==MCC_off_diag_years[i]
+
+
+
 
 
 
@@ -92,5 +112,5 @@ MCC_first_column_compiled2<-merge(MCC_first_column_compiled,base_years,by="plot"
 
 #plotting
 
-MCC<-ggplot(
+base_first_column_MCC<-ggplot(MCC_first_column_compiled2,aes(x=as.numeric(year),y=value,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=as.numeric(MCC_first_column_breaks))+theme(panel.grid.minor = element_blank())
 
