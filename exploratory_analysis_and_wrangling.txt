@@ -50,10 +50,14 @@ MCC_dist_list<-lapply(MCC_matrix_list,vegdist)
 
 MCC_dist_list<-lapply(MCC_dist_list,as.matrix)
 
+##fire and disturbance history for initial 200 plots at YTC
+
+#subset YTC env data
+
+env_master_sub<-dplyr::select(env.master2,c(PLOTID,Fire,Training,G89))
 
 
-
-##off diag - relative to previous year
+#######off diag - relative to previous year########
 
 MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {cbind(x[row(x) == (col(x) + 1)],x[-1,0],colnames(x))})
 
@@ -101,10 +105,35 @@ base_off_diag_MCC<-ggplot(MCC_off_diag_compiled,aes(x=as.numeric(current),y=dist
 
 base_off_diag_MCC + geom_line(data=od_boot_data,aes(x=od_boot_year,y=value,group=variable),colour="red")
 
+#merge in disturbance history for stratified plotting
+
+MCC_off_diag_compiled_w_disturbance<-merge(MCC_off_diag_compiled, env_master_sub, by.x="plot",by.y="PLOTID",all.x=TRUE)
+
+MCC_off_diag_compiled_w_disturbance[is.na(MCC_off_diag_compiled_w_disturbance)] <- "data_missing"
+
+##stratified plotting
+
+#fire
+
+base_off_diag_MCC_fire<-ggplot(MCC_off_diag_compiled_w_disturbance,aes(x=as.numeric(current),y=dist,group=plot))+geom_line(size=0.2,alpha=0.4)+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_off_diag_years)+theme(panel.grid.minor = element_blank())+ggtitle("off diagonal")+facet_grid(Fire~.)
+
+base_off_diag_MCC_fire + geom_line(data=od_boot_data,aes(x=od_boot_year,y=value,group=variable),colour="red")
+
+#training
 
 
+base_off_diag_MCC_training<-ggplot(MCC_off_diag_compiled_w_disturbance,aes(x=as.numeric(current),y=dist,group=plot))+geom_line(size=0.2,alpha=0.4)+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_off_diag_years)+theme(panel.grid.minor = element_blank())+ggtitle("off diagonal")+facet_grid(Training~.)
 
-#first row - relative to starting condition (without labels)
+base_off_diag_MCC_training + geom_line(data=od_boot_data,aes(x=od_boot_year,y=value,group=variable),colour="red")
+
+#89 group
+
+
+base_off_diag_MCC_89comm<-ggplot(MCC_off_diag_compiled_w_disturbance,aes(x=as.numeric(current),y=dist,group=plot))+geom_line(size=0.2,alpha=0.4)+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_off_diag_years)+theme(panel.grid.minor = element_blank())+ggtitle("off diagonal")+facet_grid(G89~.)
+
+base_off_diag_MCC_89comm + geom_line(data=od_boot_data,aes(x=od_boot_year,y=value,group=variable),colour="red")
+
+######first row - relative to starting condition (without labels)#######
 
 MCC_dist_list_first_column<-lapply(MCC_dist_list,function(x) {x[,1]})
 
@@ -158,9 +187,37 @@ fc_boot_data<-cbind(fc_boot_year,fc_boot_mean,fc_boot_10,fc_boot_90)
 fc_boot_data<-as.data.frame(fc_boot_data)
 fc_boot_data<-melt(fc_boot_data,id.vars="fc_boot_year")
 
-#plotting
+#base plotting
 
 base_first_column_MCC<-ggplot(MCC_first_column_compiled2,aes(x=year,y=value,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_first_column_years)+theme(panel.grid.minor = element_blank())+ggtitle("first column")
 
 base_first_column_MCC + geom_line(data=fc_boot_data,aes(x=fc_boot_year,y=value,group=variable),colour="red")
+
+
+#merge in disturbance history for stratified plotting
+
+MCC_first_column_compiled2_w_disturbance<-merge(MCC_first_column_compiled2, env_master_sub, by.x="plot",by.y="PLOTID",all.x=TRUE)
+
+MCC_first_column_compiled2_w_disturbance[is.na(MCC_first_column_compiled2_w_disturbance)] <- "data_missing"
+
+##stratified plotting
+
+#fire
+
+base_first_column_MCC_fire<-ggplot(MCC_first_column_compiled2_w_disturbance,aes(x=year,y=value,group=plot))+geom_line(size=0.2,alpha=0.4)+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_first_column_years)+theme(panel.grid.minor = element_blank())+ggtitle("first column")+facet_grid(Fire~.)
+
+base_first_column_MCC_fire + geom_line(data=fc_boot_data,aes(x=fc_boot_year,y=value,group=variable),colour="red")
+
+#training
+
+base_first_column_MCC_training<-ggplot(MCC_first_column_compiled2_w_disturbance,aes(x=year,y=value,group=plot))+geom_line(size=0.2,alpha=0.4)+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_first_column_years)+theme(panel.grid.minor = element_blank())+ggtitle("first column")+facet_grid(Training~.)
+
+base_first_column_MCC_training + geom_line(data=fc_boot_data,aes(x=fc_boot_year,y=value,group=variable),colour="red")
+
+# 89 group
+
+base_first_column_MCC_g89<-ggplot(MCC_first_column_compiled2_w_disturbance,aes(x=year,y=value,group=plot))+geom_line(size=0.2,alpha=0.4)+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_first_column_years)+theme(panel.grid.minor = element_blank())+ggtitle("first column")+facet_grid(G89~.)
+
+base_first_column_MCC_g89 + geom_line(data=fc_boot_data,aes(x=fc_boot_year,y=value,group=variable),colour="red")
+
 
