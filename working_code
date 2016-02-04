@@ -248,4 +248,21 @@ base_first_column_MCC_g89<-ggplot(MCC_first_column_compiled2_w_disturbance,aes(x
 
 base_first_column_MCC_g89 + geom_line(data=fc_boot_data,aes(x=fc_boot_year,y=value,group=variable),colour="red")
 
+###relative to specified year (subset data to include only those plots measured in that year)###
+
+MCC_spec_year<-lapply(MCC_dist_list,melt)
+
+##specify year of interest
+
+year<-Y
+
+
+##filter first column to include year of interest
+
+##filter second column to NOT include year of interest (0 values, comparing year to itself)
+
+
+
+
+
 
