@@ -263,6 +263,40 @@ MCC_spec_year_filtered<-lapply(MCC_spec_year,function(x) {x[which(x$Var1==year),
 ##filter second column to NOT include year of interest (0 values, comparing year to itself)
 MCC_spec_year_filtered<-lapply(MCC_spec_year_filtered,function(x) {x[which(x$Var2!=year),]})
 
+##flatten to data frame
+
+MCC_spec_year_df<-ldply(MCC_spec_year_filtered)
+
+##rename columns to friendlier names
+
+MCC_spec_year_df<-plyr::rename(MCC_spec_year_df,c(".id"="plot","Var1"="ref_year","Var2"="measured_year","value"="dist"))
+
+##check number of plots plots were excluded for not being measured that specific year
+
+length(unique(MCC_spec_year_df$plot))
+
+##bootstrapping
+
+MCC_spec_year_years<-unique(MCC_spec_year_df$measured_year)
+
+
+sy_boot_year<-c()
+sy_boot_mean<-c()
+sy_boot_10<-c()
+sy_boot_90<-c()
+
+for (i in 1:8) { 
+temp1<-MCC_spec_year_df[which(MCC_spec_year_df$measured_year==MCC_spec_year_years[i]),]
+temp2<-sample(temp1$dist,10000,replace=TRUE)
+sy_boot_mean[i]<-mean(temp2)
+sy_boot_10[i]<-quantile(temp2,0.10)
+sy_boot_90[i]<-quantile(temp2,0.90)
+sy_boot_year[i]<-temp1[1,2]
+}
+
+sy_boot_data<-cbind(sy_boot_year,sy_boot_mean,sy_boot_10,sy_boot_90)
+sy_boot_data<-as.data.frame(sy_boot_data)
+sy_boot_data<-melt(sy_boot_data,id.vars="sy_boot_year")
 
 
 
