@@ -252,6 +252,10 @@ base_first_column_MCC_g89 + geom_line(data=fc_boot_data,aes(x=fc_boot_year,y=val
 
 MCC_spec_year<-lapply(MCC_dist_list,melt)
 
+###relative to specified year (subset data to include only those plots measured in that year)###
+
+MCC_spec_year<-lapply(MCC_dist_list,melt)
+
 ##specify year of interest
 
 year<-1993
@@ -308,3 +312,28 @@ base_spec_year_MCC<-ggplot(MCC_spec_year_df_w_disturbance,aes(x=as.numeric(measu
 
 base_spec_year_MCC + geom_line(data=sy_boot_data,aes(x=sy_boot_year,y=value,group=variable),colour="red")
 
+
+
+
+
+
+
+###stratified plotting
+
+#fire
+
+base_spec_year_MCC_fire<-ggplot(MCC_spec_year_df_w_disturbance,aes(x=as.numeric(measured_year),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_spec_year_years)+theme(panel.grid.minor = element_blank())+ggtitle("specified year")+facet_grid(Fire~.)
+
+base_spec_year_MCC_fire + geom_line(data=sy_boot_data,aes(x=sy_boot_year,y=value,group=variable),colour="red")
+
+#training
+
+base_spec_year_MCC_training<-ggplot(MCC_spec_year_df_w_disturbance,aes(x=as.numeric(measured_year),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_spec_year_years)+theme(panel.grid.minor = element_blank())+ggtitle("specified year")+facet_grid(Training~.)
+
+base_spec_year_MCC_training + geom_line(data=sy_boot_data,aes(x=sy_boot_year,y=value,group=variable),colour="red")
+
+# 89 group
+
+base_spec_year_MCC_g89<-ggplot(MCC_spec_year_df_w_disturbance,aes(x=as.numeric(measured_year),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_spec_year_years)+theme(panel.grid.minor = element_blank())+ggtitle("specified year")+facet_grid(G89~.)
+
+base_spec_year_MCC_g89 + geom_line(data=sy_boot_data,aes(x=sy_boot_year,y=value,group=variable),colour="red")
