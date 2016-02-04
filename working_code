@@ -254,12 +254,15 @@ MCC_spec_year<-lapply(MCC_dist_list,melt)
 
 ##specify year of interest
 
-year<-Y
+year<-1993
 
 
 ##filter first column to include year of interest
+MCC_spec_year_filtered<-lapply(MCC_spec_year,function(x) {x[which(x$Var1==year),]})
 
 ##filter second column to NOT include year of interest (0 values, comparing year to itself)
+MCC_spec_year_filtered<-lapply(MCC_spec_year_filtered,function(x) {x[which(x$Var2!=year),]})
+
 
 
 
