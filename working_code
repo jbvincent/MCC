@@ -255,7 +255,7 @@ MCC_spec_year<-lapply(MCC_dist_list,melt)
 
 ##specify year of interest
 
-year<-1993
+year<-1994
 
 
 ##filter first column to include year of interest
@@ -286,7 +286,7 @@ sy_boot_mean<-c()
 sy_boot_10<-c()
 sy_boot_90<-c()
 
-for (i in 1:8) { 
+for (i in 1:length(MCC_spec_year_years)) { 
 temp1<-MCC_spec_year_df[which(MCC_spec_year_df$measured_year==MCC_spec_year_years[i]),]
 temp2<-sample(temp1$dist,10000,replace=TRUE)
 sy_boot_mean[i]<-mean(temp2)
