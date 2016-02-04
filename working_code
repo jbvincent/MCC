@@ -206,7 +206,7 @@ fc_boot_data<-as.data.frame(fc_boot_data)
 fc_boot_data<-melt(fc_boot_data,id.vars="fc_boot_year")
 
 
-##botstrapping for loop for stratified data 
+#########botstrapping for loop for stratified data###############
 
 #split into subgroups for bootstrapping
 
@@ -291,7 +291,7 @@ temp2<-sample(temp1$dist,10000,replace=TRUE)
 sy_boot_mean[i]<-mean(temp2)
 sy_boot_10[i]<-quantile(temp2,0.10)
 sy_boot_90[i]<-quantile(temp2,0.90)
-sy_boot_year[i]<-temp1[1,2]
+sy_boot_year[i]<-temp1[1,3]
 }
 
 sy_boot_data<-cbind(sy_boot_year,sy_boot_mean,sy_boot_10,sy_boot_90)
@@ -299,7 +299,12 @@ sy_boot_data<-as.data.frame(sy_boot_data)
 sy_boot_data<-melt(sy_boot_data,id.vars="sy_boot_year")
 
 
+MCC_spec_year_df_w_disturbance<-merge(MCC_spec_year_df, env_master_sub, by.x="plot",by.y="PLOTID",all.x=TRUE)
 
 
+##base plot (overall)
 
+base_spec_year_MCC<-ggplot(MCC_spec_year_df_w_disturbance,aes(x=as.numeric(measured_year),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_spec_year_years)+theme(panel.grid.minor = element_blank())+ggtitle("specified year")
+
+base_spec_year_MCC + geom_line(data=sy_boot_data,aes(x=sy_boot_year,y=value,group=variable),colour="red")
 
