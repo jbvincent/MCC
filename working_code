@@ -207,9 +207,9 @@ fc_boot_data<-melt(fc_boot_data,id.vars="fc_boot_year")
 
 
 
-#########botstrapping for loop for stratified data ###############
+#########bootstrapping for loop for stratified data ###############
 
-#split into subgroups for bootstrapping
+####Fire####
 
 #replace NAs in fire category
 
@@ -246,6 +246,66 @@ strat_boot_data<-as.data.frame(strat_boot_data)
 strat_boot_data<-melt(strat_boot_data,id.vars="strat_boot_burn_year")
 
 
+####Military Training####
+
+#replace NAs in training category
+
+MCC_first_column_compiled2_w_disturbance$training<-as.character(MCC_first_column_compiled2_w_disturbance$training)
+
+MCC_first_column_compiled2_w_disturbance$training[which(is.na(MCC_first_column_compiled2_w_disturbance$training))]<-"data missing"
+
+##create identifier for year/burn status 
+MCC_first_column_compiled2_w_disturbance$burn_year<-paste(MCC_first_column_compiled2_w_disturbance$training,MCC_first_column_compiled2_w_disturbance$year)
+
+#####unique training/year combos#####
+
+training__year<-unique(MCC_first_column_compiled2_w_disturbance$training_year)
+
+strat_training_boot_year<-c()
+strat_training_boot_mean<-c()
+strat_training_boot_10<-c()
+strat_training_boot_90<-c()
+strat_training_boot_burn_year<-c()
+
+for (i in 1:length(unique(burn_year))) { 
+temp1<-MCC_first_column_compiled2_w_disturbance[which(MCC_first_column_compiled2_w_disturbance$burn_year==burn_year[i]),]
+temp2<-sample(temp1$value,10000,replace=TRUE)
+strat_training_boot_mean[i]<-mean(temp2)
+strat_training_boot_10[i]<-quantile(temp2,0.10)
+strat_training_boot_90[i]<-quantile(temp2,0.90)
+strat_training_boot_year[i]<-temp1[1,3]
+strat_training_boot_burn_year[i]<-temp1[1,9]
+}
+
+strat_boot_training_data<-cbind(strat_training_boot_year,strat_training_boot_mean,strat_training_boot_10,strat_training_boot_90)
+
+strat_boot_data<-as.data.frame(strat_training_boot_data)
+strat_training_boot_data<-melt(strat_training_boot_data,id.vars="strat_training_boot_year")
+
+#####Group 89#####
+
+G89__year<-unique(MCC_first_column_compiled2_w_disturbance$G89_year)
+
+strat_G89_boot_year<-c()
+strat_G89_boot_mean<-c()
+strat_G89_boot_10<-c()
+strat_G89_boot_90<-c()
+strat_G89_boot_burn_year<-c()
+
+for (i in 1:length(unique(burn_year))) { 
+temp1<-MCC_first_column_compiled2_w_disturbance[which(MCC_first_column_compiled2_w_disturbance$burn_year==burn_year[i]),]
+temp2<-sample(temp1$value,10000,replace=TRUE)
+strat_G89_boot_mean[i]<-mean(temp2)
+strat_G89_boot_10[i]<-quantile(temp2,0.10)
+strat_G89_boot_90[i]<-quantile(temp2,0.90)
+strat_G89_boot_year[i]<-temp1[1,3]
+strat_G89_boot_burn_year[i]<-temp1[1,9]
+}
+
+strat_boot_G89_data<-cbind(strat_G89_boot_year,strat_G89_boot_mean,strat_G89_boot_10,strat_G89_boot_90)
+
+strat_boot_data<-as.data.frame(strat_G89_boot_data)
+strat_G89_boot_data<-melt(strat_G89_boot_data,id.vars="strat_G89_boot_year")
 
 
 ################
