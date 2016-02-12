@@ -206,7 +206,8 @@ fc_boot_data<-as.data.frame(fc_boot_data)
 fc_boot_data<-melt(fc_boot_data,id.vars="fc_boot_year")
 
 
-#########botstrapping for loop for stratified data (split and apply)###############
+
+#########botstrapping for loop for stratified data ###############
 
 #split into subgroups for bootstrapping
 
@@ -216,47 +217,36 @@ MCC_first_column_compiled2_w_disturbance$Fire<-as.character(MCC_first_column_com
 
 MCC_first_column_compiled2_w_disturbance$Fire[which(is.na(MCC_first_column_compiled2_w_disturbance$Fire))]<-"data missing"
 
+##create identifier for year/burn status 
+MCC_first_column_compiled2_w_disturbance$burn_year<-paste(MCC_first_column_compiled2_w_disturbance$Fire,MCC_first_column_compiled2_w_disturbance$year)
 
-MCC_first_column_compiled2_fire_split<-split(MCC_first_column_compiled2_w_disturbance,MCC_first_column_compiled2_w_disturbance$Fire)
+##unique burn/year combos
 
+burn_year<-unique(MCC_first_column_compiled2_w_disturbance$burn_year)
 
+strat_boot_year<-c()
+strat_boot_mean<-c()
+strat_boot_10<-c()
+strat_boot_90<-c()
+strat_boot_burn_year<-c()
 
-
-
-
-###############abandoned for split and apply route
-#fire
-
-disturbance<-as.character(unique(MCC_first_column_compiled2_w_disturbance$Fire))
-spec_disturb_years<-unique(MCC_first_column_compiled2_w_disturbance$disturbance)
-
-MCC_first_column_compiled2_w_disturbance$Fire<-as.character(MCC_first_column_compiled2_w_disturbance$Fire)
-
-fire_boot_mean<-()
-fire_boot_10[<-()
-fire_boot_90<-()
-fire_boot_year<-()
-
-for (i in length(unique(MCC_first_column_compiled2_w_disturbance$Fire)))
-{
-temp1<-MCC_first_column_compiled2_w_disturbance[which(MCC_first_column_compiled2_w_disturbance$Fire==disturbance[i]),]
-temp1_years<-unique(temp1$measured_year)
-for (i in length(unique(temp1$measured_year)))
-{ 				
-temp2<-temp1[which(temp1$measured_year==temp1_years[i]),]
-temp3<-sample(temp2$value,10000,replace=TRUE)
-fire_boot_mean[i]<-mean(temp3)
-fire_boot_10[i]<-quantile(temp3,0.10)
-fire_boot_90[i]<-quantile(temp3,0.90)
-fire_boot_year[i]<-temp2[1,3]
-fire_boot_disturbance_name[i]<-temp2[1,1]
-}
+for (i in 1:length(unique(burn_year))) { 
+temp1<-MCC_first_column_compiled2_w_disturbance[which(MCC_first_column_compiled2_w_disturbance$burn_year==burn_year[i]),]
+temp2<-sample(temp1$value,10000,replace=TRUE)
+strat_boot_mean[i]<-mean(temp2)
+strat_boot_10[i]<-quantile(temp2,0.10)
+strat_boot_90[i]<-quantile(temp2,0.90)
+strat_boot_year[i]<-temp1[1,3]
+strat_boot_burn_year[i]<-temp1[1,9]
 }
 
-fire_boot_data<-cbind(fire_boot_year,fire_boot_mean,fire_boot_10,fire_boot_90)
+strat_boot_data<-cbind(strat_boot_burn_year,strat_boot_mean,strat_boot_10,strat_boot_90)
 
-fire_boot_data<-as.data.frame(fire_boot_data)
-fire_boot_data<-melt(fire_boot_data,id.vars="fire_boot_year")
+strat_boot_data<-as.data.frame(strat_boot_data)
+strat_boot_data<-melt(strat_boot_data,id.vars="strat_boot_burn_year")
+
+
+
 
 ################
 
