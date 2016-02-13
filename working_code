@@ -224,42 +224,42 @@ MCC_first_column_compiled2_w_disturbance$burn_year<-paste(MCC_first_column_compi
 
 burn_year<-unique(MCC_first_column_compiled2_w_disturbance$burn_year)
 
-strat_boot_year<-c()
-strat_boot_mean<-c()
-strat_boot_10<-c()
-strat_boot_90<-c()
-strat_boot_burn_year<-c()
+strat_fire_boot_year<-c()
+strat_fire_boot_mean<-c()
+strat_fire_boot_10<-c()
+strat_fire_boot_90<-c()
+strat_fire_boot_burn_year<-c()
 
 for (i in 1:length(unique(burn_year))) { 
 temp1<-MCC_first_column_compiled2_w_disturbance[which(MCC_first_column_compiled2_w_disturbance$burn_year==burn_year[i]),]
 temp2<-sample(temp1$value,10000,replace=TRUE)
-strat_boot_mean[i]<-mean(temp2)
-strat_boot_10[i]<-quantile(temp2,0.10)
-strat_boot_90[i]<-quantile(temp2,0.90)
-strat_boot_year[i]<-temp1[1,3]
-strat_boot_burn_year[i]<-temp1[1,9]
+strat_fire_boot_mean[i]<-mean(temp2)
+strat_fire_boot_10[i]<-quantile(temp2,0.10)
+strat_fire_boot_90[i]<-quantile(temp2,0.90)
+strat_fire_boot_year[i]<-temp1[1,3]
+strat_fire_boot_burn_year[i]<-temp1[1,9]
 }
 
-strat_boot_data<-cbind(strat_boot_burn_year,strat_boot_mean,strat_boot_10,strat_boot_90)
+strat_fire_boot_data<-cbind(strat_fire_boot_burn_year,strat_fire_boot_mean,strat_fire_boot_10,strat_fire_boot_90)
 
-strat_boot_data<-as.data.frame(strat_boot_data)
-strat_boot_data<-melt(strat_boot_data,id.vars="strat_boot_burn_year")
+strat_fire_boot_data<-as.data.frame(strat_fire_boot_data)
+strat_fire_boot_data<-melt(strat_boot_data,id.vars="strat_fire_boot_burn_year")
 
 
 ####Military Training####
 
 #replace NAs in training category
 
-MCC_first_column_compiled2_w_disturbance$training<-as.character(MCC_first_column_compiled2_w_disturbance$training)
+MCC_first_column_compiled2_w_disturbance$Training<-as.character(MCC_first_column_compiled2_w_disturbance$Training)
 
-MCC_first_column_compiled2_w_disturbance$training[which(is.na(MCC_first_column_compiled2_w_disturbance$training))]<-"data missing"
+MCC_first_column_compiled2_w_disturbance$Training[which(is.na(MCC_first_column_compiled2_w_disturbance$Training))]<-"data missing"
 
 ##create identifier for year/burn status 
-MCC_first_column_compiled2_w_disturbance$burn_year<-paste(MCC_first_column_compiled2_w_disturbance$training,MCC_first_column_compiled2_w_disturbance$year)
+MCC_first_column_compiled2_w_disturbance$training_year<-paste(MCC_first_column_compiled2_w_disturbance$Training,MCC_first_column_compiled2_w_disturbance$year)
 
 #####unique training/year combos#####
 
-training__year<-unique(MCC_first_column_compiled2_w_disturbance$training_year)
+training_year<-unique(MCC_first_column_compiled2_w_disturbance$training_year)
 
 strat_training_boot_year<-c()
 strat_training_boot_mean<-c()
@@ -282,9 +282,17 @@ strat_boot_training_data<-cbind(strat_training_boot_year,strat_training_boot_mea
 strat_boot_data<-as.data.frame(strat_training_boot_data)
 strat_training_boot_data<-melt(strat_training_boot_data,id.vars="strat_training_boot_year")
 
-#####Group 89#####
+######Group 89######
 
-G89__year<-unique(MCC_first_column_compiled2_w_disturbance$G89_year)
+###
+MCC_first_column_compiled2_w_disturbance$training<-as.character(MCC_first_column_compiled2_w_disturbance$training)
+
+MCC_first_column_compiled2_w_disturbance$training[which(is.na(MCC_first_column_compiled2_w_disturbance$training))]<-"data missing"
+
+##create identifier for year/burn status 
+MCC_first_column_compiled2_w_disturbance$burn_year<-paste(MCC_first_column_compiled2_w_disturbance$training,MCC_first_column_compiled2_w_disturbance$year)
+
+G89_year<-unique(MCC_first_column_compiled2_w_disturbance$G89_year)
 
 strat_G89_boot_year<-c()
 strat_G89_boot_mean<-c()
