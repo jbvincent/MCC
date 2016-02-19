@@ -31,24 +31,21 @@ MCC_pilot_data_melted<-melt(MCC_pilot_data)
 
 MCC_pilot_data_melted<-MCC_pilot_data_melted%>%separate(master_ID, c("plot", "year"), "_")
 
+env.master2<-read.table("env.master2.txt",header=TRUE)
 
 ##split into list 
 plots<-unique(MCC_pilot_data_melted$plot)
-MCC_split_list<-split( MCC_pilot_data_melted , MCC_pilot_data_melted$plot)
+MCC_split_list<-split(MCC_pilot_data_melted , MCC_pilot_data_melted$plot)
 
 #make matrices for each plot
 
-MCC_split_list<-lapply(MCC_split_list, pra)
+MCC_split_list<-lapply(MCC_split_list,function(x) {x[,2:4]})
 
 MCC_matrix_list<-lapply(MCC_split_list,matrify)
 
-##transformation (sqr)##
+##standardize 
 
-#MCC_matrix_list<-lapply(MCC_matrix_list,function(x) {x^(1/2)})
-
-##standardize (alternative to transformation)
-
-#decostand(matrix, method = "total")
+MCC_matrix_list<-lapply(MCC_matrix_list, function (x) {decostand(x, method = "total")})
 
 ##distance 
 
