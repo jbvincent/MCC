@@ -6,10 +6,8 @@ setwd("/Users/JBVincent/Desktop/post_doc/MCC")
 library(vegan)
 library(ggplot2)
 library(tidyr)
-library(fossil)
 library(dplyr)
 library(stringr)
-library(boot)
 library(magrittr)
 library(reshape2)
 library(purrr)
@@ -17,7 +15,7 @@ library(labdsv)
 library(gdata)
 library(plyr)
 library(boot)
-library(pracma)
+
 
 
 ##read in data
@@ -25,13 +23,14 @@ library(pracma)
 MCC_pilot_data<-read.table("MCC_data.txt",header=TRUE)
 str(MCC_pilot_data)
 
+env.master2<-read.table("env.master2.txt",header=TRUE)
+
 ##unpeel comm matrix and split master id (plot_year) into two columns
 
 MCC_pilot_data_melted<-melt(MCC_pilot_data)
 
 MCC_pilot_data_melted<-MCC_pilot_data_melted%>%separate(master_ID, c("plot", "year"), "_")
 
-env.master2<-read.table("env.master2.txt",header=TRUE)
 
 ##split into list 
 plots<-unique(MCC_pilot_data_melted$plot)
