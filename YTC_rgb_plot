@@ -1,0 +1,29 @@
+##building off files in MCC working_code workspace, developing NMDS derived RGB plot for YTC plant communities
+library(fossil)
+
+dat1<-melt(MCC_pilot_data)
+
+comm_mat1<-create.matrix(dat1,tax.name="variable",locality="master_ID",abund=TRUE,abund.col="value")
+
+dist1<-vegdist(t(comm_mat1))
+
+NMDS1<-metaMDS(dist1,k=3)
+
+nmds.scores<-NMDS1$points
+max.score<-max(nmds.scores)
+min.score<-min(nmds.scores)
+scaled.scores<-(nmds.scores-min.score)/(max.score-min.score)
+com.colors<-rgb(red=scaled.scores[,1],green=scaled.scores[,2],blue=scaled.scores[,3])
+
+
+##sample code from WNG dynamics
+
+quad_coords<-read.table("50ha_grid.txt",header=TRUE)
+
+rgb_plot<-quad_coords
+rgb_plot$rgb<-com.colors
+rgb_plot$pos_q20x<-abs(rgb_plot$q20x)
+rgb_plot$pos_q20y<-abs(rgb_plot$q20y)
+
+betadiver_map<-plot(rgb_plot$pos_q20x,rgb_plot$pos_q20y, col=rgb(red=scaled.scores[,1],
+green=scaled.scores[,2],blue=scaled.scores[,3]),cex=1.6,pch=15,asp=1)
