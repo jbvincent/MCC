@@ -61,25 +61,36 @@ env_master_sub<-dplyr::select(env.master2,c(PLOTID,Fire,Training,G89))
 
 #######off diag - relative to previous year########
 
-MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {cbind(x[row(x) == (col(x) + 1)],x[-1,0],colnames(x))})
+MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {cbind(x[row(x) == (col(x) + 1)],rownames(x)[2:(nrow(x))],colnames(x)[1:(ncol(x)-1)])})
 
 MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,as.data.frame)
 
-MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,add_rownames)
+##rename columns 
+MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,function (x) {plyr::rename(x,c("V1"="dist","V2"="current","V3"="previous"))})
 
 MCC_off_diag_compiled<-ldply(MCC_dist_list_off_diag)
 
-MCC_off_diag_compiled$V1<-as.numeric(as.character(MCC_off_diag_compiled$V1))
-
-MCC_off_diag_compiled<-plyr::rename(MCC_off_diag_compiled,c(".id"="plot","rowname"="current","V1"="dist","V2"="previous"))
+MCC_off_diag_compiled<-plyr::rename(MCC_off_diag_compiled,c(".id"="plot"))
 
 MCC_off_diag_compiled$current<-as.numeric(as.character(MCC_off_diag_compiled$current))
 
 MCC_off_diag_compiled <- MCC_off_diag_compiled[which(MCC_off_diag_compiled$current > 2),]
 
+MCC_off_diag_compiled <-MCC_off_diag_compiled[complete.cases(MCC_off_diag_compiled),]
+
 #merge in disturbance history for stratified plotting
 
 MCC_off_diag_compiled_w_disturbance<-merge(MCC_off_diag_compiled, env_master_sub, by.x="plot",by.y="PLOTID",all.x=TRUE)
+
+
+MCC_off_diag_compiled_w_disturbance$Training<-as.character(MCC_off_diag_compiled_w_disturbance$Training)
+
+MCC_off_diag_compiled_w_disturbance$Fire<-as.character(MCC_off_diag_compiled_w_disturbance$Fire)
+
+MCC_off_diag_compiled_w_disturbance$Fire[which(is.na(MCC_off_diag_compiled_w_disturbance$Fire))]<-"data missing"
+
+##create identifier for year/burn status 
+MCC_off_diag_compiled_w_disturbance$burn_year<-paste(MCC_off_diag_compiled_w_disturbance$Fire,MCC_off_diag_compiled_w_disturbance$year)
 
 MCC_off_diag_compiled_w_disturbance[is.na(MCC_off_diag_compiled_w_disturbance)] <- "data_missing"
 
