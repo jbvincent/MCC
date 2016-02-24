@@ -1,9 +1,19 @@
 ##building off files in MCC working_code workspace, developing NMDS derived RGB plot for YTC plant communities
 library(fossil)
+library(dplyr)
 
 dat1<-melt(MCC_pilot_data)
 
+
+###SLOWWWWW
+
 comm_mat1<-create.matrix(dat1,tax.name="variable",locality="master_ID",abund=TRUE,abund.col="value")
+
+##alt
+
+matrify
+
+##
 
 dist1<-vegdist(t(comm_mat1))
 
@@ -13,7 +23,16 @@ nmds.scores<-NMDS1$points
 max.score<-max(nmds.scores)
 min.score<-min(nmds.scores)
 scaled.scores<-(nmds.scores-min.score)/(max.score-min.score)
-com.colors<-rgb(red=scaled.scores[,1],green=scaled.scores[,2],blue=scaled.scores[,3])
+com.colors<-cbind(rownames(scaled.scores),rgb(red=scaled.scores[,1],green=scaled.scores[,2],blue=scaled.scores[,3]))
+
+colnames(com.colors)<-c("ID","color")
+
+com.colors<-as.data.frame(com.colors)
+
+com.colors<-com.colors%>%separate(ID, c("plot", "year"), "_")
+
+ggplot(com.colors,aes(x=year,y=plot))+geom_point(position='jitter',color=com.colors$color)
+
 
 
 ##sample code from WNG dynamics
