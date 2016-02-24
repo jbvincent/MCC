@@ -5,13 +5,8 @@ library(dplyr)
 dat1<-melt(MCC_pilot_data)
 
 
-###SLOWWWWW
 
-comm_mat1<-create.matrix(dat1,tax.name="variable",locality="master_ID",abund=TRUE,abund.col="value")
-
-##alt
-
-matrify
+comm_mat<-matrify(dat1)
 
 ##
 
@@ -31,6 +26,6 @@ com.colors<-as.data.frame(com.colors)
 
 com.colors<-com.colors%>%separate(ID, c("plot", "year"), "_")
 
-ggplot(com.colors,aes(x=year,y=plot))+geom_point(position='jitter',color=com.colors$color)
+YTC_rgb<-ggplot(com.colors,aes(x=plot,y=year))+geom_tile(color=com.colors$color,size=3)+theme_classic()
 
 
