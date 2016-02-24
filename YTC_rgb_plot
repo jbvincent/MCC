@@ -34,15 +34,3 @@ com.colors<-com.colors%>%separate(ID, c("plot", "year"), "_")
 ggplot(com.colors,aes(x=year,y=plot))+geom_point(position='jitter',color=com.colors$color)
 
 
-
-##sample code from WNG dynamics
-
-quad_coords<-read.table("50ha_grid.txt",header=TRUE)
-
-rgb_plot<-quad_coords
-rgb_plot$rgb<-com.colors
-rgb_plot$pos_q20x<-abs(rgb_plot$q20x)
-rgb_plot$pos_q20y<-abs(rgb_plot$q20y)
-
-betadiver_map<-plot(rgb_plot$pos_q20x,rgb_plot$pos_q20y, col=rgb(red=scaled.scores[,1],
-green=scaled.scores[,2],blue=scaled.scores[,3]),cex=1.6,pch=15,asp=1)
