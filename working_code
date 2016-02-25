@@ -121,7 +121,6 @@ od_boot_data<-melt(od_boot_data,id.vars="od_boot_year")
 ##botstrapping for loop for stratified data
 
 
-
 ##plotting
 
 base_off_diag_MCC<-ggplot(MCC_off_diag_compiled,aes(x=as.numeric(current),y=dist,group=plot))+geom_line()+theme_bw()+ylab("Bray-Curtis Dissimilarity")+xlab("Year")+scale_x_continuous(breaks=MCC_off_diag_years)+theme(panel.grid.minor = element_blank())+ggtitle("off diagonal")
