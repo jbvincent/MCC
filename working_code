@@ -441,3 +441,45 @@ base_spec_year_MCC_g89 + geom_line(data=sy_boot_data,aes(x=sy_boot_year,y=value,
 
 ##rgb matrix
 
+##melt to long form before rebuilding matrix
+dat1<-melt(MCC_pilot_data)
+
+##community matrix
+comm_mat<-matrify(dat1)
+
+##distance matrix
+dist1<-vegdist(t(comm_mat1))
+
+###3D NMDS 
+NMDS1<-metaMDS(dist1,k=3)
+
+##extract and scale scores for each axis 
+
+nmds.scores<-NMDS1$points
+max.score<-max(nmds.scores)
+min.score<-min(nmds.scores)
+scaled.scores<-(nmds.scores-min.score)/(max.score-min.score)
+com.colors<-cbind(rownames(scaled.scores),rgb(red=scaled.scores[,1],green=scaled.scores[,2],blue=scaled.scores[,3]))
+
+##name columns
+
+colnames(com.colors)<-c("ID","color")
+
+com.colors<-as.data.frame(com.colors)
+
+##split master ID by underscore
+
+com.colors<-com.colors%>%separate(ID, c("plot", "year"), "_")
+
+##merge in disturbance data
+
+com.colors<-merge(com.colors, env_master_sub, by.x="plot",by.y="PLOTID",all.x=TRUE)
+
+##sort plots by 89 group
+
+com.colors$plot <- factor(com.colors$plot, levels=(com.colors$plot)[order(com.colors$G89)])
+
+##base plot
+YTC_rgb<-ggplot(com.colors,aes(x=plot,y=year))+geom_tile(color=com.colors$color,size=1)+theme_classic()
+
+
