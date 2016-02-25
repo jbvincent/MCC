@@ -21,6 +21,7 @@ library(boot)
 ##read in data
 
 MCC_pilot_data<-read.table("MCC_data.txt",header=TRUE)
+
 str(MCC_pilot_data)
 
 env.master2<-read.table("env.master2.txt",header=TRUE)
@@ -61,11 +62,14 @@ env_master_sub<-dplyr::select(env.master2,c(PLOTID,Fire,Training,G89))
 
 #######off diag - relative to previous year########
 
+##extract off diagonal matrix elements (distance relative to previous year)
+
 MCC_dist_list_off_diag<-lapply(MCC_dist_list,function(x) {cbind(x[row(x) == (col(x) + 1)],rownames(x)[2:(nrow(x))],colnames(x)[1:(ncol(x)-1)])})
 
 MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,as.data.frame)
 
-##rename columns 
+##rename columns and clean up data frame
+
 MCC_dist_list_off_diag<-lapply(MCC_dist_list_off_diag,function (x) {plyr::rename(x,c("V1"="dist","V2"="current","V3"="previous"))})
 
 MCC_off_diag_compiled<-ldply(MCC_dist_list_off_diag)
@@ -82,17 +86,13 @@ MCC_off_diag_compiled <-MCC_off_diag_compiled[complete.cases(MCC_off_diag_compil
 
 MCC_off_diag_compiled_w_disturbance<-merge(MCC_off_diag_compiled, env_master_sub, by.x="plot",by.y="PLOTID",all.x=TRUE)
 
-
 MCC_off_diag_compiled_w_disturbance$Training<-as.character(MCC_off_diag_compiled_w_disturbance$Training)
 
 MCC_off_diag_compiled_w_disturbance$Fire<-as.character(MCC_off_diag_compiled_w_disturbance$Fire)
 
 MCC_off_diag_compiled_w_disturbance$Fire[which(is.na(MCC_off_diag_compiled_w_disturbance$Fire))]<-"data missing"
 
-##create identifier for year/burn status 
-MCC_off_diag_compiled_w_disturbance$burn_year<-paste(MCC_off_diag_compiled_w_disturbance$Fire,MCC_off_diag_compiled_w_disturbance$year)
-
-MCC_off_diag_compiled_w_disturbance[is.na(MCC_off_diag_compiled_w_disturbance)] <- "data_missing"
+MCC_off_diag_compiled$dist<-as.numeric(as.character(MCC_off_diag_compiled$dist))
 
 ##botstrapping for loop using all data
 
@@ -120,7 +120,7 @@ od_boot_data<-melt(od_boot_data,id.vars="od_boot_year")
 
 ##botstrapping for loop for stratified data
 
-#########bootstrapping for loops for stratified data ###############
+####bootstrapping for loops for stratified data #######
 
 ####Fire####
 
@@ -132,6 +132,7 @@ MCC_off_diag_compiled_w_disturbance$Fire[which(is.na(MCC_off_diag_compiled_w_dis
 
 ##create identifier for year/burn status 
 MCC_off_diag_compiled_w_disturbance$burn_year<-paste(MCC_off_diag_compiled_w_disturbance$Fire,MCC_off_diag_compiled_w_disturbance$year)
+
 
 ##unique burn/year combos
 
@@ -227,6 +228,7 @@ strat_boot_G89_data<-cbind(strat_G89_boot_year,strat_G89_boot_mean,strat_G89_boo
 
 strat_boot_data<-as.data.frame(strat_G89_boot_data)
 strat_G89_boot_data<-melt(strat_G89_boot_data,id.vars="strat_G89_boot_year")
+
 
 
 ##plotting
@@ -461,7 +463,9 @@ base_first_column_MCC_g89<-ggplot(MCC_first_column_compiled2_w_disturbance,aes(x
 
 base_first_column_MCC_g89 + geom_line(data=fc_boot_data,aes(x=fc_boot_year,y=value,group=variable),colour="red")
 
-###relative to specified year (subset data to include only those plots measured in that year)###
+
+
+############relative to specified year (subset data to include only those plots measured in that year)############
 
 MCC_spec_year<-lapply(MCC_dist_list,melt)
 
@@ -556,7 +560,7 @@ dat1<-melt(MCC_pilot_data)
 comm_mat<-matrify(dat1)
 
 ##distance matrix
-dist1<-vegdist(t(comm_mat1))
+dist1<-vegdist(comm_mat)
 
 ###3D NMDS 
 NMDS1<-metaMDS(dist1,k=3)
@@ -589,5 +593,21 @@ com.colors$plot <- factor(com.colors$plot, levels=(com.colors$plot)[order(com.co
 
 ##base plot
 YTC_rgb<-ggplot(com.colors,aes(x=plot,y=year))+geom_tile(color=com.colors$color,size=1)+theme_classic()
+
+
+
+
+
+##previous code using grid
+
+#quad_coords<-read.table("50ha_grid.txt",header=TRUE)
+
+#rgb_plot<-quad_coords (x and y coords for each cell)
+#rgb_plot$rgb<-com.colors
+#rgb_plot$pos_q20x<-abs(rgb_plot$q20x)
+#rgb_plot$pos_q20y<-abs(rgb_plot$q20y)
+
+#betadiver_map<-plot(rgb_plot$pos_q20x,rgb_plot$pos_q20y, col=rgb(red=scaled.scores[,1],
+#green=scaled.scores[,2],blue=scaled.scores[,3]),cex=1.6,pch=15,asp=1)
 
 
